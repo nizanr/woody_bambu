@@ -2,9 +2,22 @@ import mongoose from "mongoose";
 export async function connectDB() {
   if (process.env.NODE_ENV === "production" && !process.env.MONGODB_URI)
     throw Error("MONGODB_URI is required in production");
-  const uri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/bahceni";
-  await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
-  return uri;
+  let uri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/bahceni";
+  try {
+    await mongoose.connect(uri, { serverSelectionTimeoutMS: 1500 });
+    return uri;
+  } catch (err) {
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Yerel MongoDB bulunamadı, bellek içi (in-memory) MongoDB başlatılıyor...");
+      const { MongoMemoryServer } = await import("mongodb-memory-server");
+      const mongod = await MongoMemoryServer.create();
+      uri = mongod.getUri();
+      await mongoose.connect(uri);
+      console.log("Bellek içi MongoDB hazır!");
+      return uri;
+    }
+    throw err;
+  }
 }
 const userSchema = new mongoose.Schema(
   {

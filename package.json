@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.64.0",
+    "mongodb-memory-server": "^11.3.0",
     "supertest": "^7.1.0"
   }
 }
