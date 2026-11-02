@@ -73,6 +73,37 @@ function useNavbarScroll() {
     return () => window.removeEventListener('scroll', onScroll);
   });
 }
+
+/* ─── Live Visitor Count Hook (SSE) ─── */
+function useVisitorCount() {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    let es;
+    try {
+      es = new EventSource('/api/visitors/stream');
+      es.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (Number.isInteger(data.count)) setCount(data.count);
+        } catch {}
+      };
+      es.onerror = () => {
+        es.close();
+        // fallback: poll once
+        fetch('/api/visitors/count').then(r => r.json()).then(d => {
+          if (Number.isInteger(d.count)) setCount(d.count);
+        }).catch(() => {});
+      };
+    } catch {
+      fetch('/api/visitors/count').then(r => r.json()).then(d => {
+        if (Number.isInteger(d.count)) setCount(d.count);
+      }).catch(() => {});
+    }
+    return () => es?.close();
+  }, []);
+  return count;
+}
+
 const money = (n) =>
   new Intl.NumberFormat("tr-TR", {
     style: "currency",
@@ -106,6 +137,7 @@ function App() {
     [busy, setBusy] = useState(false),
     [loadError, setLoadError] = useState(""),
     [pageKey, setPageKey] = useState(0);
+  const visitorCount = useVisitorCount();
   useEffect(() => {
     if (!modal) return;
     const previous = document.activeElement;
@@ -398,6 +430,15 @@ function App() {
               <span>YENİ KOLEKSİYON</span>
               <strong>Dışarıda hayat var.</strong>
             </div>
+            {visitorCount > 0 && (
+              <div className="hero-visitor">
+                <div className="visitor-counter">
+                  <span className="pulse-dot" />
+                  <span className="count">{visitorCount}</span>
+                  <span>kişi şu an geziyor</span>
+                </div>
+              </div>
+            )}
           </section>
           <section className="benefits">
             <div className="reveal">

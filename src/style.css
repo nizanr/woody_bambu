@@ -1167,6 +1167,59 @@ td select {
   transform: scale(1.005);
 }
 
+/* Live visitor counter */
+.visitor-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(250, 249, 246, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 9px 16px;
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--green);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  border: 1px solid rgba(225, 227, 218, 0.6);
+  animation: counterIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.visitor-counter .pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: #4caf50;
+  border-radius: 50%;
+  position: relative;
+  flex-shrink: 0;
+}
+.visitor-counter .pulse-dot::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: rgba(76, 175, 80, 0.35);
+  animation: pulseDot 2s ease-in-out infinite;
+}
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.8); opacity: 0; }
+}
+@keyframes counterIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.visitor-counter .count {
+  font-weight: 700;
+  font-size: 12px;
+  color: #1a5c2e;
+}
+.hero-visitor {
+  position: absolute;
+  bottom: 45px;
+  left: 8%;
+  z-index: 2;
+}
+
 /* ─── END ANIMATION SYSTEM ─── */
 
 @media (min-width: 1600px) {
@@ -1290,6 +1343,20 @@ td select {
   }
   .hero-label {
     display: none;
+  }
+  .hero-visitor {
+    bottom: auto;
+    top: 15px;
+    left: auto;
+    right: 5%;
+  }
+  .visitor-counter {
+    font-size: 9px;
+    padding: 7px 12px;
+    gap: 6px;
+  }
+  .visitor-counter .count {
+    font-size: 10px;
   }
   .hero-bottom {
     margin-top: 60px;

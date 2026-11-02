@@ -484,6 +484,30 @@ export function createApp(uri, { paymentClient } = {}) {
       res.json(u ? view(u) : null);
     },
   );
+  /* ─── Live visitor counter (SSE) ─── */
+  const visitors = new Set();
+  const broadcast = () => {
+    const data = `data: ${JSON.stringify({ count: visitors.size })}\n\n`;
+    for (const res of visitors) res.write(data);
+  };
+  app.get("/api/visitors/stream", (req, res) => {
+    res.writeHead(200, {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    });
+    res.write(`data: ${JSON.stringify({ count: visitors.size + 1 })}\n\n`);
+    visitors.add(res);
+    broadcast();
+    req.on("close", () => {
+      visitors.delete(res);
+      broadcast();
+    });
+  });
+  app.get("/api/visitors/count", (req, res) =>
+    res.json({ count: visitors.size }),
+  );
+
   app.use((e, req, res, next) => {
     console.error(e.message);
     res
