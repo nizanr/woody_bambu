@@ -1,9 +1,78 @@
-import React, { useEffect, useState, lazy, Suspense } from "react";
+import React, { useEffect, useState, useRef, useCallback, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 const Studio = lazy(() => import("./Studio"));
 import "@fontsource-variable/dm-sans";
 import "@fontsource-variable/manrope";
 import "./style.css";
+
+/* ─── Scroll Reveal Hook ─── */
+function useScrollReveal() {
+  useEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => el.classList.add('visible'));
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    const targets = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+    targets.forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  });
+}
+
+/* ─── Parallax Hook ─── */
+function useParallax() {
+  useEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+    const hero = document.querySelector('.hero-image');
+    if (!hero) return;
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(() => {
+          const scrollY = window.scrollY;
+          hero.style.transform = `scale(1.03) translateY(${scrollY * 0.25}px)`;
+          ticking = false;
+        });
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  });
+}
+
+/* ─── Navbar Scroll Hook ─── */
+function useNavbarScroll() {
+  useEffect(() => {
+    const navbar = document.querySelector('.navbar');
+    if (!navbar) return;
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(() => {
+          if (window.scrollY > 60) {
+            navbar.classList.add('scrolled');
+          } else {
+            navbar.classList.remove('scrolled');
+          }
+          ticking = false;
+        });
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  });
+}
 const money = (n) =>
   new Intl.NumberFormat("tr-TR", {
     style: "currency",
@@ -31,10 +100,12 @@ function App() {
     [modal, setModal] = useState(null),
     [selected, setSelected] = useState(null),
     [toast, setToast] = useState(""),
+    [toastHiding, setToastHiding] = useState(false),
     [orders, setOrders] = useState([]),
     [payment, setPayment] = useState(null),
     [busy, setBusy] = useState(false),
-    [loadError, setLoadError] = useState("");
+    [loadError, setLoadError] = useState(""),
+    [pageKey, setPageKey] = useState(0);
   useEffect(() => {
     if (!modal) return;
     const previous = document.activeElement;
@@ -89,7 +160,7 @@ function App() {
       return [];
     }
   });
-  const notify = (s) => setToast(s);
+  const notify = (s) => { setToastHiding(false); setToast(s); };
   useEffect(() => {
     Promise.all([
       api("/api/products"),
@@ -117,10 +188,17 @@ function App() {
   }, [cart]);
   useEffect(() => {
     if (toast) {
-      const t = setTimeout(() => setToast(""), 5000);
+      const t = setTimeout(() => {
+        setToastHiding(true);
+        setTimeout(() => { setToast(""); setToastHiding(false); }, 350);
+      }, 4650);
       return () => clearTimeout(t);
     }
   }, [toast]);
+  /* Animation hooks */
+  useScrollReveal();
+  useParallax();
+  useNavbarScroll();
   const add = (p) => {
     setCart((c) => {
       const old = c.find((i) => i.id === p._id);
@@ -159,6 +237,7 @@ function App() {
   if (sort === "high") shown.sort((a, b) => b.price - a.price);
   const collection = () => {
     setPage("home");
+    setPageKey(k => k + 1);
     setTimeout(
       () =>
         document
@@ -248,25 +327,25 @@ function App() {
           refresh={() => api("/api/products").then(setProducts)}
         />
       ) : page === "about" ? (
-        <main className="about">
-          <span className="eyebrow">HİKÂYEMİZ</span>
-          <h1>
+        <main className="about page-transition" key={"about-" + pageKey}>
+          <span className="eyebrow reveal">HİKÂYEMİZ</span>
+          <h1 className="reveal">
             Bir bahçeden
             <br />
             çok daha fazlası.
           </h1>
-          <p>
+          <p className="reveal">
             Bahçeni Tasarla, Nisa Nur Çakır ve Zeynep Ulusoy'un bahçe mobilyası
             alışverişini bir tasarım deneyimine dönüştüren web programlama
             projesidir.
           </p>
-          <p>
+          <p className="reveal">
             Mobilyayı satın almadan önce kendi alanınızda deneyin. Bahçe
             fotoğrafınızı yükleyin, 3D modeli yerleştirin ve sizin için doğru
             düzeni bulun.
           </p>
           <button
-            className="primary"
+            className="primary reveal"
             onClick={() => {
               setSelected(products[0]);
               setModal("studio");
@@ -276,7 +355,7 @@ function App() {
           </button>
         </main>
       ) : (
-        <main>
+        <main className="page-transition" key={"home-" + pageKey}>
           <section className="hero">
             <div className="hero-image" />
             <div className="hero-shade" />
@@ -321,27 +400,27 @@ function App() {
             </div>
           </section>
           <section className="benefits">
-            <div>
+            <div className="reveal">
               <span>♧</span>
               <p>
                 Doğaya yakın tasarım
                 <small>Doğal dokular, zamansız çizgiler</small>
               </p>
             </div>
-            <div>
+            <div className="reveal">
               <span>◈</span>
               <p>
                 Önce bahçende gör<small>Fotoğrafın üzerinde 3D deneyim</small>
               </p>
             </div>
-            <div>
+            <div className="reveal">
               <span>♙</span>
               <p>
                 Senin için burada
                 <small>Kolay alışveriş, şeffaf sipariş takibi</small>
               </p>
             </div>
-            <div>
+            <div className="reveal">
               <span>↗</span>
               <p>
                 Kapına kadar<small>₺15.000 üzeri ücretsiz teslimat</small>
@@ -349,7 +428,7 @@ function App() {
             </div>
           </section>
           <section className="collection" id="collection">
-            <div className="section-heading">
+            <div className="section-heading reveal">
               <div>
                 <span className="eyebrow">BAHÇENİN YENİ FAVORİLERİ</span>
                 <h2>Dışarıda güzel bir hayat.</h2>
@@ -397,9 +476,9 @@ function App() {
                 </select>
               </div>
             </div>
-            <div className="product-grid">
+            <div className="product-grid reveal-stagger">
               {shown.map((p, i) => (
-                <article className="product" key={p._id}>
+                <article className="product reveal" key={p._id}>
                   <div className="product-image">
                     <button
                       className="image-open"
@@ -461,12 +540,12 @@ function App() {
             )}
           </section>
           <section className="design-promo">
-            <div className="promo-photo">
+            <div className="promo-photo reveal-left">
               <span className="floating-pill">
                 ◈ SENİN ALANIN, SENİN TASARIMIN
               </span>
             </div>
-            <div className="promo-copy">
+            <div className="promo-copy reveal-right">
               <span className="eyebrow">HAYAL ETMEKLE KALMA</span>
               <h2>
                 Bahçende nasıl
@@ -538,9 +617,9 @@ function App() {
         </div>
       </footer>
       {toast && (
-        <div className="toast" role="status">
+        <div className={"toast" + (toastHiding ? " hiding" : "")} role="status">
           {toast}
-          <button onClick={() => setToast("")} aria-label="Bildirimi kapat">
+          <button onClick={() => { setToastHiding(true); setTimeout(() => { setToast(""); setToastHiding(false); }, 350); }} aria-label="Bildirimi kapat">
             ×
           </button>
         </div>

@@ -901,6 +901,274 @@ td select {
 .error-banner button {
   text-decoration: underline;
 }
+/* ─── ANIMATION SYSTEM ─── */
+
+/* Scroll reveal: elements start invisible and slide up */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Stagger delays for grid children */
+.reveal-stagger > .reveal:nth-child(1) { transition-delay: 0s; }
+.reveal-stagger > .reveal:nth-child(2) { transition-delay: 0.1s; }
+.reveal-stagger > .reveal:nth-child(3) { transition-delay: 0.2s; }
+.reveal-stagger > .reveal:nth-child(4) { transition-delay: 0.3s; }
+.reveal-stagger > .reveal:nth-child(5) { transition-delay: 0.4s; }
+.reveal-stagger > .reveal:nth-child(6) { transition-delay: 0.5s; }
+.reveal-stagger > .reveal:nth-child(7) { transition-delay: 0.6s; }
+.reveal-stagger > .reveal:nth-child(8) { transition-delay: 0.7s; }
+
+/* Reveal from left/right */
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-50px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-right {
+  opacity: 0;
+  transform: translateX(50px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-left.visible,
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Hero parallax */
+.hero-image {
+  will-change: transform;
+  transition: transform 0.1s linear;
+}
+
+/* Hero text entrance */
+@keyframes heroFadeUp {
+  from { opacity: 0; transform: translateY(35px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-content .eyebrow { animation: heroFadeUp 0.9s 0.2s both cubic-bezier(0.16, 1, 0.3, 1); }
+.hero-content h1       { animation: heroFadeUp 0.9s 0.4s both cubic-bezier(0.16, 1, 0.3, 1); }
+.hero-content p        { animation: heroFadeUp 0.9s 0.55s both cubic-bezier(0.16, 1, 0.3, 1); }
+.hero-buttons          { animation: heroFadeUp 0.9s 0.7s both cubic-bezier(0.16, 1, 0.3, 1); }
+.hero-bottom           { animation: heroFadeUp 0.9s 0.85s both cubic-bezier(0.16, 1, 0.3, 1); }
+
+/* Floating pill pulse */
+@keyframes floatPulse {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+.floating-pill {
+  animation: floatPulse 3s ease-in-out infinite;
+}
+
+/* Product card micro-animations */
+.product {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 5px;
+}
+.product:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 50px -12px rgba(41, 63, 50, 0.15);
+}
+.product-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(41, 63, 50, 0.12), transparent 50%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+  border-radius: 5px;
+}
+.product:hover .product-image::after {
+  opacity: 1;
+}
+.try-btn {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.35s, transform 0.35s, background 0.2s;
+}
+.product:hover .try-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+.quick-add {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s;
+}
+.quick-add:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.product-tag {
+  transition: background 0.3s;
+}
+.product:hover .product-tag {
+  background: #fffdf4;
+}
+.swatches i {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.swatches i:hover {
+  transform: scale(1.35);
+}
+
+/* Button hover effects */
+.cream-btn,
+.glass-btn,
+.primary,
+.secondary {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s,
+              background 0.25s,
+              border-color 0.25s;
+}
+.cream-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -5px rgba(41, 63, 50, 0.15);
+}
+.glass-btn:hover {
+  transform: translateY(-2px);
+  border-color: #ffffff60;
+  background: #ffffff12;
+}
+.primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -5px rgba(41, 63, 50, 0.3);
+  background: #1e3027;
+}
+.secondary:hover {
+  transform: translateY(-2px);
+  border-color: #b5bba9;
+}
+
+/* Toast animation */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px) scale(0.95);
+  }
+}
+.toast {
+  animation: toastIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.toast.hiding {
+  animation: toastOut 0.35s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+}
+
+/* Page fade transition */
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-transition {
+  animation: pageFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Modal entrance */
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.overlay {
+  animation: overlayIn 0.3s;
+}
+.modal {
+  animation: modalIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Benefits icon bounce on hover */
+.benefits > div > span {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: inline-block;
+}
+.benefits > div:hover > span {
+  transform: scale(1.2) rotate(-5deg);
+}
+
+/* Navbar scroll effect */
+.navbar {
+  transition: box-shadow 0.3s, height 0.3s;
+}
+.navbar.scrolled {
+  box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+  height: 75px;
+}
+
+/* Brand symbol spin on hover */
+.brand-symbol {
+  display: inline-block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.brand:hover .brand-symbol {
+  transform: rotate(90deg);
+}
+
+/* Announcement marquee shimmer */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.announcement span {
+  background: linear-gradient(90deg, #e8ece2 0%, #ffffffcc 50%, #e8ece2 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+/* Cart item slide-in */
+@keyframes cartItemIn {
+  from { opacity: 0; transform: translateX(-15px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.cart-item {
+  animation: cartItemIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Design promo section  */
+.design-promo {
+  transition: transform 0.3s;
+}
+.design-promo:hover {
+  transform: scale(1.005);
+}
+
+/* ─── END ANIMATION SYSTEM ─── */
+
 @media (min-width: 1600px) {
   .hero {
     min-height: 700px;
@@ -1211,5 +1479,10 @@ td select {
   * {
     scroll-behavior: auto !important;
     transition: none !important;
+    animation: none !important;
+  }
+  .reveal, .reveal-left, .reveal-right {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
